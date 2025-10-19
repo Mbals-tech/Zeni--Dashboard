@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zeni Vault Login</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background-color: #f5f7ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 350px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #365eff;
+      margin-bottom: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #365eff;
+      color: white;
+      border: none;
+      padding: 0.8rem;
+      width: 100%;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2b4dd4;
+    }
+
+    p {
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h1>Zeni Vault Login</h1>
+    <input type="text" id="name" placeholder="Enter your name" required />
+    <input type="text" id="contact" placeholder="Enter your contact number" required />
+    <button onclick="login()">Login</button>
+    <p>Use the same details you registered with in the system.</p>
+  </div>
+
+  <script>
+    function login() {
+      const name = document.getElementById("name").value.trim();
+      const contact = document.getElementById("contact").value.trim();
+
+      if (!name || !contact) {
+        alert("Please enter both name and contact number.");
+        return;
+      }
+
+      // Store login info in localStorage
+      localStorage.setItem("zeniUser", JSON.stringify({ name, contact }));
+
+      // Redirect to dashboard
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
