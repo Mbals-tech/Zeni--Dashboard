@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zeni Vault – Register</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f0f4fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h2 { color: #003366; }
+    input, button {
+      width: 100%;
+      padding: 0.9rem;
+      margin-top: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #003366;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0055cc;
+    }
+    p { margin-top: 1rem; }
+    a { color: #003366; text-decoration: none; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Create Your Zeni Vault Account</h2>
+    <form id="registerForm">
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="text" id="contact" placeholder="Contact Number" required />
+      <input type="password" id="password" placeholder="Create Password" required />
+      <button type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="login.html">Login</a></p>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const registerForm = document.getElementById("registerForm");
+    const status = document.getElementById("status");
+
+    registerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const contact = document.getElementById("contact").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const urlParams = new URLSearchParams(window.location.search);
+      const referrer = urlParams.get("ref") || "None";
+
+      if (name && contact && password) {
+        const userData = { name, contact, password, referrer };
+        localStorage.setItem("zenivault_user", JSON.stringify(userData));
+        status.innerText = "✅ Registration successful!";
+        setTimeout(() => window.location.href = "index.html", 1000);
+      } else {
+        status.innerText = "❌ Please fill in all fields.";
+      }
+    });
+  </script>
+</body>
+</html>
