@@ -1,78 +1,58 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zeni Vault – Login</title>
+  <meta charset="utf-8" />
+  <title>Zeni Vault — Login</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body {
-      font-family: "Poppins", sans-serif;
-      background: #eef3fa;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-    }
-    h2 { color: #003366; }
-    input, button {
-      width: 100%;
-      padding: 0.9rem;
-      margin-top: 1rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-    }
-    button {
-      background-color: #003366;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0055cc;
-    }
-    p { margin-top: 1rem; }
-    a { color: #003366; text-decoration: none; font-weight: bold; }
+    body { font-family: 'Poppins', sans-serif; background:#f5f7fa; color:#222; margin:0; padding:0; }
+    .wrap{max-width:480px;margin:80px auto;padding:24px;background:#fff;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.08);}
+    h1{margin:0 0 16px;font-size:22px;}
+    label{display:block;margin:12px 0 6px;font-weight:600;}
+    input{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;}
+    .btn{display:inline-block;padding:10px 16px;background:#3f6df0;color:white;border-radius:8px;border:0;cursor:pointer;margin-top:12px;}
+    .muted{color:#666;font-size:13px}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Login to Zeni Vault</h2>
-    <form id="loginForm">
-      <input type="text" id="contact" placeholder="Contact Number" required />
-      <input type="password" id="password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
-    <p>Don’t have an account? <a href="register.html">Register</a></p>
-    <p id="status"></p>
+  <div class="wrap">
+    <h1>Login</h1>
+    <label>Contact number</label>
+    <input id="contact" placeholder="E.g. 0821234567" />
+    <label>Password (optional)</label>
+    <input id="password" type="password" placeholder="If you set a password" />
+    <div>
+      <button class="btn" id="loginBtn">Login</button>
+      <a href="register.html" style="margin-left:12px;color:#3f6df0">Register</a>
+    </div>
+    <p id="msg" class="muted"></p>
   </div>
 
-  <script>
-    const loginForm = document.getElementById("loginForm");
-    const status = document.getElementById("status");
+<script>
+(function(){
+  const $contact = document.getElementById('contact');
+  const $password = document.getElementById('password');
+  const $btn = document.getElementById('loginBtn');
+  const $msg = document.getElementById('msg');
 
-    loginForm.addEventListener("submit", (e) => {
-      e.preventDefault();
+  function readUsers(){ return JSON.parse(localStorage.getItem('zeni_users') || '[]'); }
 
-      const contact = document.getElementById("contact").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const savedUser = JSON.parse(localStorage.getItem("zenivault_user"));
+  $btn.addEventListener('click', ()=>{
+    const contact = $contact.value.trim();
+    const password = $password.value || "";
+    if(!contact){ $msg.textContent = "Please enter your contact number."; return; }
+    const users = readUsers();
+    const user = users.find(u=>u.contact === contact);
+    if(!user){ $msg.textContent = "No account found. Please register."; return; }
+    // If password present on account, enforce it
+    if(user.password && user.password !== password){ $msg.textContent = "Incorrect password."; return; }
 
-      if (savedUser && savedUser.contact === contact && savedUser.password === password) {
-        status.innerText = "✅ Login successful!";
-        setTimeout(() => window.location.href = "index.html", 1000);
-      } else {
-        status.innerText = "❌ Invalid credentials. Please try again.";
-      }
-    });
-  </script>
+    // set session
+    localStorage.setItem('zeni_current', JSON.stringify({ contact: user.contact, name: user.name }));
+    $msg.textContent = "Logging in…";
+    setTimeout(()=> location.href = 'index.html', 500);
+  });
+})();
+</script>
 </body>
 </html>
