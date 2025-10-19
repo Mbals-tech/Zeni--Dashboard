@@ -324,6 +324,43 @@ const PACKAGES = [
   }
 
 })();
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Check if a user is logged in
+  const loggedInUser = JSON.parse(localStorage.getItem("zenivault_user"));
+
+  if (!loggedInUser) {
+    // No user data found — redirect to login
+    window.location.href = "login.html";
+    return;
+  }
+
+  // Show dashboard content if logged in
+  const dashboard = document.getElementById("dashboard");
+  if (dashboard) {
+    dashboard.innerHTML = `
+      <h2>Welcome, ${loggedInUser.name} 👋</h2>
+      <p>Your investment details will appear below:</p>
+      <div class="card">
+        <p><strong>Package:</strong> ${loggedInUser.package}</p>
+        <p><strong>Deposit:</strong> R${loggedInUser.deposit}</p>
+        <p><strong>Daily Return:</strong> R${loggedInUser.dailyReturn}</p>
+        <p><strong>Duration:</strong> ${loggedInUser.duration} days</p>
+        <p><strong>Total Income:</strong> R${loggedInUser.totalIncome}</p>
+      </div>
+      <button id="logoutBtn" class="btn-logout">Logout</button>
+    `;
+  }
+
+  // Handle logout
+  document.addEventListener("click", (e) => {
+    if (e.target && e.target.id === "logoutBtn") {
+      localStorage.removeItem("zenivault_user");
+      window.location.href = "login.html";
+    }
+  });
+});
 </script>
+
 </body>
 </html>
