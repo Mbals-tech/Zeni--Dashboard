@@ -62,6 +62,20 @@
       border-radius: 6px;
       cursor: pointer;
     }
+    .package {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .package h3 { margin: 0; color: #0984e3; }
+    .proof-upload {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f1f2f6;
+      border-radius: 6px;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -74,16 +88,24 @@
     }
     th { background-color: #f8f9fa; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    (function(){
+      emailjs.init("w-FZyzfjZq7EjnEVs"); // ✅ Your EmailJS public key
+    })();
+  </script>
 </head>
 <body>
   <header>ZeniVault Dashboard</header>
 
   <nav>
     <button onclick="showSection('investments')">Investments</button>
+    <button onclick="showSection('packages')">Packages</button>
     <button onclick="showSection('referrals')">Referrals</button>
     <button onclick="logout()">Logout</button>
   </nav>
 
+  <!-- 📊 Investments Section -->
   <section id="investments" class="active">
     <h2>Your Investments</h2>
     <table id="investmentTable">
@@ -99,10 +121,46 @@
     </table>
   </section>
 
+  <!-- 💰 Packages Section -->
+  <section id="packages">
+    <h2>Choose Your Investment Package</h2>
+
+    <div class="package">
+      <h3>💎 Bronze Package</h3>
+      <p>R500 investment → Daily Return: R25</p>
+      <button onclick="selectPackage('Bronze', 500)">Select</button>
+    </div>
+
+    <div class="package">
+      <h3>🥈 Silver Package</h3>
+      <p>R1000 investment → Daily Return: R60</p>
+      <button onclick="selectPackage('Silver', 1000)">Select</button>
+    </div>
+
+    <div class="package">
+      <h3>🥇 Gold Package</h3>
+      <p>R2000 investment → Daily Return: R130</p>
+      <button onclick="selectPackage('Gold', 2000)">Select</button>
+    </div>
+
+    <div id="bankDetails" style="display:none;" class="proof-upload">
+      <h3>💳 TymeBank Payment Details</h3>
+      <p><strong>Account Name:</strong> Zeni Vault</p>
+      <p><strong>Bank:</strong> TymeBank</p>
+      <p><strong>Account Number:</strong> 123456789</p>
+      <p><strong>Reference:</strong> Your Name + Package</p>
+
+      <h4>📤 Upload Proof of Payment</h4>
+      <input type="file" id="proofFile" accept=".jpg,.jpeg,.png,.pdf">
+      <button onclick="sendProof()">Submit Proof</button>
+    </div>
+  </section>
+
+  <!-- 🧑‍🤝‍🧑 Referrals Section -->
   <section id="referrals">
     <h2>Your Referral Link</h2>
     <div class="referral-link-box">
-      <p>Share your unique link to invite others and earn rewards!</p>
+      <p>Share your link and earn rewards!</p>
       <input type="text" class="ref-link" id="refLink" readonly>
       <button class="copy-btn" onclick="copyReferral()">Copy</button>
     </div>
@@ -110,18 +168,14 @@
     <h3 style="margin-top: 2rem;">Referred Users</h3>
     <table id="referralTable">
       <thead>
-        <tr>
-          <th>Name</th>
-          <th>Contact</th>
-          <th>Referral Code</th>
-        </tr>
+        <tr><th>Name</th><th>Contact</th><th>Referral Code</th></tr>
       </thead>
       <tbody></tbody>
     </table>
   </section>
 
   <script>
-    // ✅ Show only selected section
+    // ✅ Show selected section
     function showSection(id) {
       document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
       document.getElementById(id).classList.add('active');
@@ -129,37 +183,68 @@
 
     // ✅ Get logged-in user
     const user = JSON.parse(localStorage.getItem('zenivault_user'));
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-
-    if (!isLoggedIn || !user) {
+    if (!user) {
       alert("Please login first");
       window.location.href = "../login.html";
     }
 
-    // ✅ Display referral link
+    // ✅ Load referral link
     const referralLink = `${window.location.origin}/register.html?ref=${user.referralCode}`;
-    document.getElementById('refLink').value = referralLink;
+    document.getElementById("refLink").value = referralLink;
 
     function copyReferral() {
-      const refInput = document.getElementById('refLink');
-      refInput.select();
-      navigator.clipboard.writeText(refInput.value);
+      navigator.clipboard.writeText(referralLink);
       alert("Referral link copied!");
     }
 
-    // ✅ Show fake investment data for now
+    // ✅ Handle package selection
+    let selectedPackage = null;
+    function selectPackage(pkg, amount) {
+      selectedPackage = { pkg, amount };
+      document.getElementById("bankDetails").style.display = "block";
+      alert(`You selected the ${pkg} package for R${amount}. Please make payment and upload proof.`);
+    }
+
+    // ✅ Send proof of payment via EmailJS
+    function sendProof() {
+      const fileInput = document.getElementById("proofFile");
+      if (!fileInput.files.length) {
+        alert("Please select a proof of payment file first.");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const templateParams = {
+        from_name: user.name,
+        contact: user.contact,
+        package_name: selectedPackage.pkg,
+        amount: selectedPackage.amount,
+      };
+
+      emailjs.send("service_zenivault", "template_proof", templateParams)
+      .then(() => {
+        alert("✅ Proof of payment sent successfully to ZeniVault!");
+        fileInput.value = "";
+      })
+      .catch(err => {
+        console.error(err);
+        alert("❌ Failed to send proof of payment. Please try again.");
+      });
+    }
+
+    // ✅ Demo investment list
     const demoInvestments = [
-      { package: "Bronze", amount: "R500", daily: "R25", status: "Active" },
-      { package: "Silver", amount: "R1000", daily: "R60", status: "Active" },
+      { package: "Bronze", amount: "R500", daily: "R25", status: "Active" }
     ];
     const investBody = document.querySelector("#investmentTable tbody");
     demoInvestments.forEach(inv => {
-      investBody.innerHTML += `<tr>
-        <td>${inv.package}</td><td>${inv.amount}</td><td>${inv.daily}</td><td>${inv.status}</td>
-      </tr>`;
+      investBody.innerHTML += `<tr><td>${inv.package}</td><td>${inv.amount}</td><td>${inv.daily}</td><td>${inv.status}</td></tr>`;
     });
 
-    // ✅ Show referred users (stored locally)
+    // ✅ Show referred users
     const allUsers = JSON.parse(localStorage.getItem("zenivault_referrals")) || [];
     const referred = allUsers.filter(u => u.referrerCode === user.referralCode);
     const refTable = document.querySelector("#referralTable tbody");
