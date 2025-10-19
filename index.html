@@ -1,125 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Zeni Vault Dashboard</title>
-    <style>
-      body {
-        font-family: "Poppins", sans-serif;
-        margin: 0;
-        background-color: #f5f8ff;
-        color: #333;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zeni Vault Dashboard</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5f8ff;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
 
-      header {
-        background-color: #4169e1;
-        color: white;
-        text-align: center;
-        padding: 20px;
-        font-size: 1.8rem;
-        font-weight: 600;
-      }
+    header {
+      background-color: #3b5bff;
+      color: white;
+      text-align: center;
+      padding: 1rem 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
 
-      main {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        min-height: 80vh;
-        padding: 20px;
-      }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background-color: #3b5bff;
+      color: white;
+      margin-top: 2rem;
+    }
 
-      .card {
-        background-color: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        margin: 20px 0;
-        width: 90%;
-        max-width: 800px;
-        text-align: center;
-      }
+    .card {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+    }
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-      }
+    .login-box {
+      text-align: center;
+      max-width: 400px;
+      margin: 4rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
 
-      th,
-      td {
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-      }
+    .login-box input {
+      width: 90%;
+      padding: 0.8rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
 
-      th {
-        background-color: #f0f4ff;
-      }
+    .login-box button {
+      width: 95%;
+      padding: 0.8rem;
+      background-color: #3b5bff;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
 
-      footer {
-        background-color: #4169e1;
-        color: white;
-        text-align: center;
-        padding: 10px;
-        font-size: 0.9rem;
-      }
-    </style>
-  </head>
-  <body>
-    <header>💰 Zeni Vault Dashboard</header>
-    <main>
-      <div class="card" id="data-card">
-        <p>Loading your investment data...</p>
-      </div>
-    </main>
-    <footer>© 2025 Zeni Vault</footer>
+    .login-box button:hover {
+      background-color: #2a45cc;
+    }
 
-    <script>
-      // ✅ Google Sheet CSV link (published version)
-      const sheetURL =
-        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZWiVZXMDk1ucOx9bjbwGS2H8rWQVEu9D93ODyHic-bIHpqXEePe0_4vvCKhlvnpH1-QXBC85fM3S0/pub?output=csv";
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
 
-      // ✅ Use a public CORS proxy to safely access it
-      const proxyURL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(sheetURL);
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
 
-      async function loadSheetData() {
-        try {
-          const response = await fetch(proxyURL);
-          if (!response.ok) throw new Error("Failed to load data");
-          const csvText = await response.text();
+    th {
+      background-color: #eef1ff;
+    }
 
-          // Parse CSV text
-          const rows = csvText.split("\n").map((r) => r.split(","));
-          const headers = rows[0];
-          const dataRows = rows.slice(1);
+    tr:nth-child(even) {
+      background-color: #f8faff;
+    }
 
-          if (dataRows.length === 0) {
-            document.getElementById("data-card").innerHTML = "<p>No data found in your sheet.</p>";
-            return;
-          }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>💰 Zeni Vault Dashboard</header>
 
-          // Create HTML table
-          let html = "<table><tr>";
-          headers.forEach((h) => (html += `<th>${h}</th>`));
-          html += "</tr>";
+  <!-- Login Section -->
+  <div id="login-section" class="login-box">
+    <h2>Login to View Your Investment</h2>
+    <input type="text" id="name" placeholder="Enter your name" />
+    <input type="text" id="contact" placeholder="Enter your contact number" />
+    <button onclick="login()">Login</button>
+    <p id="error-message" style="color: red; display: none;">User not found. Please check your details.</p>
+  </div>
 
-          dataRows.forEach((row) => {
-            html += "<tr>";
-            row.forEach((cell) => (html += `<td>${cell}</td>`));
-            html += "</tr>";
-          });
-          html += "</table>";
+  <!-- Dashboard Section -->
+  <div id="dashboard-section" class="hidden">
+    <div class="card">
+      <table id="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Package</th>
+            <th>Amount Invested</th>
+            <th>Date</th>
+            <th>Daily Return</th>
+            <th>Total Return</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="7" style="text-align:center;">Loading your investment data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-          document.getElementById("data-card").innerHTML = html;
-        } catch (error) {
-          document.getElementById("data-card").innerHTML =
-            "<p style='color:red;'>⚠️ Could not load data. Check your sheet link or publish settings.</p>";
-          console.error(error);
-        }
-      }
+  <footer>© 2025 Zeni Vault</footer>
 
-      loadSheetData();
-    </script>
-  </body>
-</html>
+  <scri
