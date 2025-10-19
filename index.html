@@ -1,17 +1,80 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zeni Vault</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zeni Vault — Dashboard</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <img src="ZeniLogo.png" alt="Zeni Vault Logo" class="logo" />
-    <h1>Zeni Vault Dashboard</h1>
-    <div id="user-dashboard"></div>
+  <div class="wrap">
+    <header class="card header">
+      <img src="ZeniLogo.png" alt="Zeni Vault Logo" class="logo" />
+      <h1>Zeni Vault Dashboard</h1>
+      <div id="lastUpdated" class="small">Loading data…</div>
+    </header>
+
+    <main class="card">
+      <section>
+        <h2>Investments</h2>
+        <div id="investments">Loading investments…</div>
+      </section>
+
+      <section style="margin-top:18px;">
+        <h2>Withdrawals</h2>
+        <div id="withdrawals">Loading withdrawals…</div>
+      </section>
+    </main>
+
+    <footer class="card small">
+      <div>Referral link (example): <code id="refLink">https://your-site/?ref=YOURCODE</code></div>
+      <div style="margin-top:8px;">Contact support: <a id="whats" href="#" target="_blank">WhatsApp</a></div>
+    </footer>
   </div>
-  <script src="app.js"></script>
+
+  <script>
+  const SHEET_ID = "1UZP5l-k5M_zoavrffeDxx5zvz45182ANWAg6WpU77po";
+  const SHEET_INV = "Investments";
+  const SHEET_WD = "Withdrawals";
+
+  async function fetchGviz(sheetName){
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+    const res = await fetch(url);
+    const txt = await res.text();
+    const jsonStr = txt.replace(/^.*setResponse\(|\);?\s*$/s, '');
+    const data = JSON.parse(jsonStr);
+    const cols = data.table.cols.map(c => c.label || c.id);
+    const rows = data.table.rows.map(r => r.c.map(cell => (cell && cell.v) || ''));
+    return { cols, rows };
+  }
+
+  function renderTable(cols, rows){
+    if (!rows.length) return '<div class="empty">No rows</div>';
+    let html = '<div class="table-wrap"><table><thead><tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>';
+    for (const r of rows){
+      html += '<tr>' + r.map(c=>`<td>${c}</td>`).join('') + '</tr>';
+    }
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  async function loadAll(){
+    try {
+      const [inv, wd] = await Promise.all([fetchGviz(SHEET_INV), fetchGviz(SHEET_WD)]);
+      document.getElementById('investments').innerHTML = renderTable(inv.cols, inv.rows);
+      document.getElementById('withdrawals').innerHTML = renderTable(wd.cols, wd.rows);
+      document.getElementById('lastUpdated').textContent = 'Data loaded from Google Sheets';
+      const wa = '27824238988';
+      document.getElementById('whats').href = `https://wa.me/${wa}?text=${encodeURIComponent('Hello Zeni Vault support')}`;
+    } catch (e){
+      console.error(e);
+      document.getElementById('investments').textContent = 'Error loading investments.';
+      document.getElementById('withdrawals').textContent = 'Error loading withdrawals.';
+      document.getElementById('lastUpdated').textContent = 'Error loading data';
+    }
+  }
+
+  loadAll();
+  </script>
 </body>
 </html>
