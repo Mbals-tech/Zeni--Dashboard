@@ -4,227 +4,162 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Zeni Vault Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    (function(){
+      emailjs.init("YOUR_PUBLIC_KEY_HERE"); // replace with your EmailJS public key
+    })();
+  </script>
   <style>
     body {
-      font-family: "Poppins", sans-serif;
-      background: #f8fafc;
-      margin: 0;
-      padding: 0;
+      background: #f8f9fa;
+      font-family: 'Poppins', sans-serif;
     }
-    header {
-      background-color: #003366;
-      color: white;
-      text-align: center;
-      padding: 1.5rem;
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
-    main {
-      padding: 2rem;
+    .dashboard {
       max-width: 900px;
-      margin: auto;
-    }
-    .card {
+      margin: 40px auto;
       background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 30px;
     }
-    h2 {
-      color: #003366;
-      margin-bottom: 1rem;
+    .logout-btn {
+      float: right;
+      margin-top: -10px;
     }
     table {
       width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1.5rem;
+      margin-top: 20px;
     }
-    table th, table td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-    th {
-      background-color: #003366;
-      color: white;
-    }
-    input, button {
-      padding: 0.8rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      width: 100%;
-      margin-bottom: 1rem;
-      font-size: 1rem;
-    }
-    button {
-      background-color: #003366;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background-color: #0055cc;
+    .ref-link {
+      background: #e9ecef;
+      padding: 10px;
+      border-radius: 10px;
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
-  <header>Zeni Vault Dashboard</header>
 
-  <main>
-    <!-- Investment Section -->
-    <div class="card">
-      <h2>Your Investments</h2>
-      <table id="investments-table">
+  <div class="dashboard">
+    <h2>Welcome to Zeni Vault Dashboard</h2>
+    <button class="btn btn-danger btn-sm logout-btn" onclick="logout()">Logout</button>
+
+    <h5 class="mt-3" id="userName"></h5>
+
+    <div class="mt-4">
+      <h4>Your Investments</h4>
+      <table class="table table-bordered" id="investmentTable">
         <thead>
           <tr>
             <th>Package</th>
             <th>Amount</th>
             <th>Daily Return</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody id="investments-body">
-          <tr><td colspan="4">Loading your data...</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Withdrawals Section -->
-    <div class="card">
-      <h2>Your Withdrawals</h2>
-      <table id="withdrawals-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Amount</th>
             <th>Status</th>
           </tr>
         </thead>
-        <tbody id="withdrawals-body">
-          <tr><td colspan="3">Loading your data...</td></tr>
+        <tbody id="dataBody">
+          <tr><td colspan="4" class="text-center">Loading data...</td></tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Proof of Payment Upload -->
-    <div class="card">
-      <h2>Upload Proof of Payment</h2>
-      <form id="proofForm">
-        <input type="text" id="from_name" placeholder="Your Full Name" required />
-        <input type="text" id="from_contact" placeholder="Your Contact Number" required />
-        <input type="file" id="proof_file" accept="image/*,.pdf" required />
-        <button type="submit">Send Proof</button>
-      </form>
-      <p id="uploadStatus"></p>
+    <div class="mt-4">
+      <h4>Your Referral Link</h4>
+      <p class="ref-link" id="refLink"></p>
     </div>
 
-    <button id="logoutBtn">Logout</button>
-  </main>
+    <div class="mt-4">
+      <h4>Upload Proof of Payment</h4>
+      <form id="proofForm">
+        <input type="file" class="form-control mb-2" id="proofFile" required />
+        <button type="submit" class="btn btn-success">Upload Proof</button>
+      </form>
+    </div>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script>
-    /***********************
-     * CONFIGURATION
-     ***********************/
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZWiVZXMDk1ucOx9bjbwGS2H8rWQVEu9D93ODyHic-bIHpqXEePe0_4vvCKhlvnpH1-QXBC85fM3S0/pub?output=csv";
-
-    const serviceID = "service_zenivault";  // replace with your actual one from EmailJS
-    const templateID = "template_proof";    // replace with your actual one
-    const publicKey = "YOUR_EMAILJS_PUBLIC_KEY"; // replace with your actual one
-
-    emailjs.init(publicKey);
-
-    /***********************
-     * LOGIN CHECK
-     ***********************/
-    const loggedUser = JSON.parse(localStorage.getItem("zenivault_user"));
-    if (!loggedUser) {
+    // Redirect if user not logged in
+    const currentUser = JSON.parse(localStorage.getItem("zeniUser"));
+    if (!currentUser) {
       window.location.href = "login.html";
     }
 
-    /***********************
-     * LOAD USER DATA
-     ***********************/
-    async function loadSheetData() {
-      const res = await fetch(SHEET_URL);
-      const text = await res.text();
-      const rows = text.split("\n").slice(1).map(r => r.split(","));
+    document.getElementById("userName").innerText = 
+      `Hello, ${currentUser.name} (${currentUser.contact})`;
 
-      const investmentsBody = document.getElementById("investments-body");
-      const withdrawalsBody = document.getElementById("withdrawals-body");
+    // Referral link generation
+    const referralLink = `${window.location.origin}/register.html?ref=${encodeURIComponent(currentUser.contact)}`;
+    document.getElementById("refLink").innerText = referralLink;
 
-      investmentsBody.innerHTML = "";
-      withdrawalsBody.innerHTML = "";
+    // Fetch user data from Google Sheet
+    fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQZWiVZXMDk1ucOx9bjbwGS2H8rWQVEu9D93ODyHic-bIHpqXEePe0_4vvCKhlvnpH1-QXBC85fM3S0/pub?output=csv")
+      .then(res => res.text())
+      .then(csv => {
+        const rows = csv.split("\n").slice(1);
+        const tableBody = document.getElementById("dataBody");
+        tableBody.innerHTML = "";
+        let hasData = false;
 
-      rows.forEach(row => {
-        const [name, contact, type, packageName, amount, dailyReturn, date, status] = row.map(r => r.trim());
-        if (name === loggedUser.name && contact === loggedUser.contact) {
-          if (type.toLowerCase() === "investment") {
-            investmentsBody.innerHTML += `
-              <tr>
-                <td>${packageName}</td>
-                <td>${amount}</td>
-                <td>${dailyReturn}</td>
-                <td>${date}</td>
-              </tr>`;
-          } else if (type.toLowerCase() === "withdrawal") {
-            withdrawalsBody.innerHTML += `
-              <tr>
-                <td>${date}</td>
-                <td>${amount}</td>
-                <td>${status}</td>
-              </tr>`;
+        rows.forEach(row => {
+          const cols = row.split(",");
+          const name = cols[0]?.trim();
+          const contact = cols[1]?.trim();
+          const packageName = cols[2]?.trim();
+          const amount = cols[3]?.trim();
+          const dailyReturn = cols[4]?.trim();
+          const status = cols[5]?.trim();
+
+          if (name && contact && 
+              name.toLowerCase() === currentUser.name.toLowerCase() && 
+              contact === currentUser.contact) {
+            hasData = true;
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${packageName}</td>
+              <td>${amount}</td>
+              <td>${dailyReturn}</td>
+              <td>${status}</td>`;
+            tableBody.appendChild(tr);
           }
+        });
+
+        if (!hasData) {
+          tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No investments found for you yet.</td></tr>`;
         }
+      })
+      .catch(err => {
+        console.error("Error loading data:", err);
+        document.getElementById("dataBody").innerHTML = `<tr><td colspan="4" class="text-center text-danger">Failed to load data.</td></tr>`;
       });
-    }
-    loadSheetData();
 
-    /***********************
-     * PROOF OF PAYMENT
-     ***********************/
-    document.getElementById("proofForm").addEventListener("submit", async function(e) {
+    // Proof upload (EmailJS)
+    document.getElementById("proofForm").addEventListener("submit", function(e) {
       e.preventDefault();
-
-      const from_name = document.getElementById("from_name").value;
-      const from_contact = document.getElementById("from_contact").value;
-      const fileInput = document.getElementById("proof_file");
+      const fileInput = document.getElementById("proofFile");
       const file = fileInput.files[0];
 
-      if (!file) {
-        alert("Please select a file.");
-        return;
-      }
+      if (!file) return alert("Please select a file");
 
-      const reader = new FileReader();
-      reader.onload = async function() {
-        const fileData = reader.result;
-        const params = {
-          from_name,
-          from_contact,
-          file: fileData
-        };
+      const formData = new FormData();
+      formData.append("file", file);
 
-        try {
-          await emailjs.send(serviceID, templateID, params);
-          document.getElementById("uploadStatus").innerText = "✅ Proof sent successfully!";
-          document.getElementById("proofForm").reset();
-        } catch (error) {
-          document.getElementById("uploadStatus").innerText = "❌ Failed to send proof. Please try again.";
-          console.error(error);
-        }
-      };
-      reader.readAsDataURL(file);
+      emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+        name: currentUser.name,
+        contact: currentUser.contact,
+        message: "Proof of payment uploaded."
+      })
+      .then(() => alert("Proof uploaded successfully!"))
+      .catch(err => alert("Error sending proof: " + err.text));
     });
 
-    /***********************
-     * LOGOUT
-     ***********************/
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.removeItem("zenivault_user");
+    // Logout
+    function logout() {
+      localStorage.removeItem("zeniUser");
       window.location.href = "login.html";
-    });
+    }
   </script>
+
 </body>
 </html>
