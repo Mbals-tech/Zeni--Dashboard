@@ -1,262 +1,329 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZeniVault Dashboard</title>
+  <meta charset="utf-8" />
+  <title>Zeni Vault Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: "Poppins", sans-serif;
-      background: #f9fafb;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #00b894;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-    }
-    nav {
-      display: flex;
-      justify-content: center;
-      background-color: #f1f2f6;
-      padding: 1rem;
-      gap: 15px;
-    }
-    nav button {
-      padding: 10px 20px;
-      background: #0984e3;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    nav button:hover { background: #076bcc; }
-    section {
-      display: none;
-      padding: 2rem;
-    }
-    section.active { display: block; }
-    .referral-link-box {
-      background: white;
-      border-radius: 8px;
-      padding: 1rem;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    input.ref-link {
-      width: 80%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-top: 10px;
-    }
-    .copy-btn {
-      padding: 10px 15px;
-      margin-left: 5px;
-      border: none;
-      background-color: #00b894;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .package {
-      background: white;
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 1rem 0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .package h3 { margin: 0; color: #0984e3; }
-    .proof-upload {
-      margin-top: 1rem;
-      padding: 1rem;
-      background: #f1f2f6;
-      border-radius: 6px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }
-    th { background-color: #f8f9fa; }
+    :root{--blue:#3f6df0;--muted:#6b7280}
+    body{font-family:'Poppins',sans-serif;background:#f3f6fa;margin:0;color:#222}
+    header{background:var(--blue);color:#fff;padding:24px;text-align:center}
+    header h1{margin:0;font-size:28px}
+    .container{max-width:980px;margin:28px auto;padding:0 16px}
+    .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 20px rgba(0,0,0,.06);margin-bottom:18px}
+    .muted{color:var(--muted)}
+    .center{text-align:center}
+    .flex{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--blue);color:#fff;padding:10px 16px;border-radius:8px;border:0;cursor:pointer}
+    .table{width:100%;border-collapse:collapse}
+    .table th{background:#eef3ff;padding:10px;border-bottom:1px solid #e6e9f1;text-align:left}
+    .table td{padding:12px;border-bottom:1px solid #eef1f7}
+    .package-list{display:flex;gap:12px;flex-wrap:wrap}
+    .package{flex:1 1 180px;padding:12px;border-radius:8px;border:1px solid #e7eafc;background:#fff}
+    .package h3{margin:0 0 6px}
+    .hidden{display:none}
+    .small{font-size:13px;color:var(--muted)}
+    .refbox{background:#f8fafc;padding:10px;border-radius:8px;border:1px dashed #dbeafe;margin-top:12px}
+    footer{background:var(--blue);color:#fff;padding:16px;text-align:center;margin-top:36px}
+    input,select{padding:8px;border:1px solid #e2e8f0;border-radius:8px;width:100%}
+    .upload-row{display:flex;gap:12px;align-items:center}
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-  <script>
-    (function(){
-      emailjs.init("w-FZyzfjZq7EjnEVs"); // ✅ Your EmailJS public key
-    })();
-  </script>
 </head>
 <body>
-  <header>ZeniVault Dashboard</header>
+  <header>
+    <h1>💰 Zeni Vault Dashboard</h1>
+  </header>
 
-  <nav>
-    <button onclick="showSection('investments')">Investments</button>
-    <button onclick="showSection('packages')">Packages</button>
-    <button onclick="showSection('referrals')">Referrals</button>
-    <button onclick="logout()">Logout</button>
-  </nav>
-
-  <!-- 📊 Investments Section -->
-  <section id="investments" class="active">
-    <h2>Your Investments</h2>
-    <table id="investmentTable">
-      <thead>
-        <tr>
-          <th>Package</th>
-          <th>Amount</th>
-          <th>Daily Return</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <!-- 💰 Packages Section -->
-  <section id="packages">
-    <h2>Choose Your Investment Package</h2>
-
-    <div class="package">
-      <h3>💎 Bronze Package</h3>
-      <p>R500 investment → Daily Return: R25</p>
-      <button onclick="selectPackage('Bronze', 500)">Select</button>
+  <div class="container">
+    <div class="card center" id="loadingCard">
+      <p id="loadingText">Loading your investment data...</p>
     </div>
 
-    <div class="package">
-      <h3>🥈 Silver Package</h3>
-      <p>R1000 investment → Daily Return: R60</p>
-      <button onclick="selectPackage('Silver', 1000)">Select</button>
+    <div class="card hidden" id="dashboardCard">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <strong id="userName">Hello</strong><div class="small" id="userContact"></div>
+        </div>
+        <div>
+          <button class="btn" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+
+      <div class="refbox" style="margin-top:12px">
+        <div><strong>Your referral link:</strong></div>
+        <div id="refLink" class="small"></div>
+        <div class="small" style="margin-top:6px">Referral bonus: <strong>20%</strong> of the deposit amount.</div>
+      </div>
+
+      <h3 style="margin-top:18px">Your investments</h3>
+      <div id="investmentsWrap" class="muted small">If you have investments recorded in the Google sheet with your name & contact, they will appear here.</div>
+
+      <hr style="margin:18px 0">
+
+      <h3>Select package & pay</h3>
+      <div class="package-list" id="packages"></div>
+
+      <div id="bankDetails" class="hidden" style="margin-top:18px">
+        <div class="small">DEPOSIT INTO: <strong>TYME BANK</strong></div>
+        <div class="small">ACC NUMBER: <strong>5300 1355 373</strong></div>
+        <div class="small">REF: <strong id="bankRef"></strong> (use your contact used to register)</div>
+
+        <div style="margin-top:12px">
+          <label>Upload proof of payment (image/pdf)</label>
+          <div class="upload-row">
+            <input type="file" id="proofFile" accept="image/*,application/pdf" />
+            <button class="btn" id="sendProofBtn">Send proof (email)</button>
+          </div>
+          <div id="sendMsg" class="small muted" style="margin-top:8px"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="package">
-      <h3>🥇 Gold Package</h3>
-      <p>R2000 investment → Daily Return: R130</p>
-      <button onclick="selectPackage('Gold', 2000)">Select</button>
+    <div class="card hidden" id="tableCard">
+      <table class="table" id="dataTable">
+        <thead>
+          <tr>
+            <th>Name | Contact | Package | Amount | Date Invested | Daily Return | Total Return</th>
+          </tr>
+        </thead>
+        <tbody id="dataBody"></tbody>
+      </table>
     </div>
+  </div>
 
-    <div id="bankDetails" style="display:none;" class="proof-upload">
-      <h3>💳 TymeBank Payment Details</h3>
-      <p><strong>Account Name:</strong> Zeni Vault</p>
-      <p><strong>Bank:</strong> TymeBank</p>
-      <p><strong>Account Number:</strong> 123456789</p>
-      <p><strong>Reference:</strong> Your Name + Package</p>
+  <footer>© 2025 Zeni Vault</footer>
 
-      <h4>📤 Upload Proof of Payment</h4>
-      <input type="file" id="proofFile" accept=".jpg,.jpeg,.png,.pdf">
-      <button onclick="sendProof()">Submit Proof</button>
-    </div>
-  </section>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+/* ---------------------------
+  Configuration (editable)
+---------------------------- */
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZWiVZXMDk1ucOx9bjbwGS2H8rWQVEu9D93ODyHic-bIHpqXEePe0_4vvCKhlvnpH1-QXBC85fM3S0/pub?output=csv";
 
-  <!-- 🧑‍🤝‍🧑 Referrals Section -->
-  <section id="referrals">
-    <h2>Your Referral Link</h2>
-    <div class="referral-link-box">
-      <p>Share your link and earn rewards!</p>
-      <input type="text" class="ref-link" id="refLink" readonly>
-      <button class="copy-btn" onclick="copyReferral()">Copy</button>
-    </div>
+const EMAILJS_SERVICE = "service_zenivault";
+const EMAILJS_TEMPLATE = "template_proof";
+const EMAILJS_PUBLIC_KEY = "w-FZyzfjZq7EjnEVs"; // as provided
+const EMAIL_TARGET = "zenivault5@gmail.com"; // proof destination
 
-    <h3 style="margin-top: 2rem;">Referred Users</h3>
-    <table id="referralTable">
-      <thead>
-        <tr><th>Name</th><th>Contact</th><th>Referral Code</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
+/* ---------------------------
+  Packages (yours)
+---------------------------- */
+const PACKAGES = [
+  { id:"starter", title:"Starter", deposit:"R200", daily:"R60", duration:"45 days", total:"R2700" },
+  { id:"starter_pro", title:"Starter Pro", deposit:"R500", daily:"R150", duration:"45 days", total:"R6750" },
+  { id:"standard", title:"Standard", deposit:"R1000", daily:"R300", duration:"45 days", total:"R13500" },
+  { id:"premium", title:"Premium", deposit:"R2000", daily:"R600", duration:"45 days", total:"R27000" },
+  { id:"elite", title:"Elite", deposit:"R5000", daily:"R1500", duration:"45 days", total:"R67500" }
+];
 
-  <script>
-    // ✅ Show selected section
-    function showSection(id) {
-      document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
+/* ---------------------------
+  Boot
+---------------------------- */
+(function(){
+  // initialize EmailJS
+  if(window.emailjs && EMAILJS_PUBLIC_KEY){
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }
 
-    // ✅ Get logged-in user
-    const user = JSON.parse(localStorage.getItem('zenivault_user'));
-    if (!user) {
-      alert("Please login first");
-      window.location.href = "../login.html";
-    }
+  const $loadingCard = document.getElementById('loadingCard');
+  const $dashboardCard = document.getElementById('dashboardCard');
+  const $tableCard = document.getElementById('tableCard');
+  const $userName = document.getElementById('userName');
+  const $userContact = document.getElementById('userContact');
+  const $refLink = document.getElementById('refLink');
+  const $bankRef = document.getElementById('bankRef');
+  const $investWrap = document.getElementById('investmentsWrap');
+  const $dataBody = document.getElementById('dataBody');
+  const $packages = document.getElementById('packages');
+  const $bankDetails = document.getElementById('bankDetails');
+  const $proofFile = document.getElementById('proofFile');
+  const $sendProofBtn = document.getElementById('sendProofBtn');
+  const $sendMsg = document.getElementById('sendMsg');
+  const $logoutBtn = document.getElementById('logoutBtn');
 
-    // ✅ Load referral link
-    const referralLink = `${window.location.origin}/register.html?ref=${user.referralCode}`;
-    document.getElementById("refLink").value = referralLink;
+  // Session
+  const session = JSON.parse(localStorage.getItem('zeni_current') || 'null');
+  if(!session){ // not logged in -> redirect to login
+    // quick fallback: go to login
+    location.href = 'login.html';
+    return;
+  }
 
-    function copyReferral() {
-      navigator.clipboard.writeText(referralLink);
-      alert("Referral link copied!");
-    }
+  // show user
+  $userName.textContent = session.name;
+  $userContact.textContent = session.contact;
+  const referralCode = "ZV-" + session.contact;
+  const myRefLink = location.origin + location.pathname.replace(/index\.html$/,'') + 'register.html?ref=' + encodeURIComponent(referralCode);
+  $refLink.textContent = myRefLink;
+  $bankRef.textContent = session.contact;
 
-    // ✅ Handle package selection
-    let selectedPackage = null;
-    function selectPackage(pkg, amount) {
-      selectedPackage = { pkg, amount };
-      document.getElementById("bankDetails").style.display = "block";
-      alert(`You selected the ${pkg} package for R${amount}. Please make payment and upload proof.`);
-    }
+  // logout handler
+  $logoutBtn.addEventListener('click', ()=>{
+    localStorage.removeItem('zeni_current');
+    location.href = 'login.html';
+  });
 
-    // ✅ Send proof of payment via EmailJS
-    function sendProof() {
-      const fileInput = document.getElementById("proofFile");
-      if (!fileInput.files.length) {
-        alert("Please select a proof of payment file first.");
-        return;
+  // render packages
+  PACKAGES.forEach(p=>{
+    const div = document.createElement('div');
+    div.className = 'package';
+    div.innerHTML = `
+      <h3>${p.title}</h3>
+      <div class="small">Deposit: <strong>${p.deposit}</strong></div>
+      <div class="small">Daily: <strong>${p.daily}</strong></div>
+      <div class="small">Duration: <strong>${p.duration}</strong></div>
+      <div style="margin-top:8px">
+        <button class="btn selectPackage" data-id="${p.id}">Select ${p.title}</button>
+      </div>
+    `;
+    $packages.appendChild(div);
+  });
+
+  // handle package selection
+  $packages.addEventListener('click', (ev)=>{
+    const btn = ev.target.closest('.selectPackage');
+    if(!btn) return;
+    const id = btn.dataset.id;
+    const pkg = PACKAGES.find(x=>x.id === id);
+    if(!pkg) return;
+    // show bank details and set reference to contact
+    $bankDetails.classList.remove('hidden');
+    $sendMsg.textContent = `Selected: ${pkg.title}. Please deposit ${pkg.deposit} to the bank details below and upload proof.`;
+    // attach package info to send button dataset
+    $sendProofBtn.dataset.package = JSON.stringify(pkg);
+  });
+
+  // send proof using EmailJS (client-side). We will include the file as base64 (if small) or just send user details and name.
+  $sendProofBtn.addEventListener('click', async ()=>{
+    const pkg = JSON.parse($sendProofBtn.dataset.package || '{}');
+    if(!pkg.id){ $sendMsg.textContent = "Please select a package first."; return; }
+    const file = $proofFile.files[0];
+    $sendMsg.textContent = "Sending proof, please wait...";
+    // prepare template params
+    const templateParams = {
+      to_email: EMAIL_TARGET,
+      user_name: session.name,
+      user_contact: session.contact,
+      package_selected: pkg.title,
+      deposit_amount: pkg.deposit,
+      account_details: "TYME BANK — ACC: 5300 1355 373 — REF: " + session.contact,
+      message: "Proof of payment uploaded by user " + session.name + " (" + session.contact + ")"
+    };
+
+    // If file present, convert to base64 for the template (beware of size)
+    if(file){
+      try {
+        const base64 = await toBase64(file);
+        templateParams.proof_base64 = base64;
+        templateParams.proof_filename = file.name;
+      } catch(e){
+        console.error(e);
       }
+    }
 
-      const file = fileInput.files[0];
-      const formData = new FormData();
-      formData.append("file", file);
+    // send via emailjs
+    try {
+      if(!window.emailjs){ throw new Error("EmailJS not available. Make sure the public key is set."); }
+      await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, templateParams);
+      $sendMsg.textContent = "Proof sent — thank you! We'll email you if we need anything.";
+    } catch (err){
+      console.error(err);
+      $sendMsg.textContent = "Failed to send proof. Please email proof to: " + EMAIL_TARGET + " (or try again).";
+    }
+  });
 
-      const templateParams = {
-        from_name: user.name,
-        contact: user.contact,
-        package_name: selectedPackage.pkg,
-        amount: selectedPackage.amount,
-      };
+  function toBase64(file){ return new Promise((res,rej)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> res(reader.result);
+    reader.onerror = ()=> rej(reader.error);
+    reader.readAsDataURL(file);
+  }); }
 
-      emailjs.send("service_zenivault", "template_proof", templateParams)
-      .then(() => {
-        alert("✅ Proof of payment sent successfully to ZeniVault!");
-        fileInput.value = "";
-      })
-      .catch(err => {
-        console.error(err);
-        alert("❌ Failed to send proof of payment. Please try again.");
+  // fetch sheet csv, parse and display only rows that match session.name OR session.contact
+  fetch(SHEET_CSV_URL).then(r=>{
+    if(!r.ok) throw new Error("Failed to fetch sheet: " + r.status);
+    return r.text();
+  }).then(text=>{
+    const rows = csvToArray(text);
+    // expected columns (depending on your sheet): Name, Contact, Package, Amount, DateInvested, DailyReturn, TotalReturn
+    // Try to map header names case-insensitively.
+    if(rows.length === 0){ $investWrap.textContent = "No data found in your sheet."; showDashboard(); return; }
+
+    const headers = Object.keys(rows[0]).map(h=>h.toLowerCase());
+    // filter rows for this user
+    const filtered = rows.filter(r=>{
+      const nameMatch = (r.Name && r.Name.toString().trim().toLowerCase() === session.name.toLowerCase());
+      const contactMatch = (r.Contact && r.Contact.toString().trim() === session.contact);
+      return nameMatch || contactMatch;
+    });
+
+    if(filtered.length === 0){
+      $investWrap.textContent = "No investment rows found for your account in the sheet.";
+    } else {
+      $investWrap.textContent = "";
+      $tableCard.classList.remove('hidden');
+      // fill table body
+      $dataBody.innerHTML = '';
+      filtered.forEach(row=>{
+        const name = row.Name || row.name || '';
+        const contact = row.Contact || row.contact || '';
+        const pkg = row.Package || row.package || '';
+        const amount = row.Amount || row.amount || '';
+        const date = row.Date || row.DateInvested || row.date || row.dateinvested || '';
+        const daily = row.DailyReturn || row.dailyreturn || row.Daily || '';
+        const total = row.TotalReturn || row.totalreturn || row.total || '';
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.innerHTML = `<strong>${name}</strong> &nbsp; ${contact} &nbsp; | &nbsp; <strong>${pkg}</strong> &nbsp; | &nbsp; ${amount} &nbsp; | &nbsp; ${date} &nbsp; | &nbsp; ${daily} &nbsp; | &nbsp; ${total}`;
+        tr.appendChild(td);
+        $dataBody.appendChild(tr);
       });
     }
+    showDashboard();
+  }).catch(err=>{
+    console.error(err);
+    $investWrap.textContent = "Could not load sheet data (network or URL issue).";
+    showDashboard();
+  });
 
-    // ✅ Demo investment list
-    const demoInvestments = [
-      { package: "Bronze", amount: "R500", daily: "R25", status: "Active" }
-    ];
-    const investBody = document.querySelector("#investmentTable tbody");
-    demoInvestments.forEach(inv => {
-      investBody.innerHTML += `<tr><td>${inv.package}</td><td>${inv.amount}</td><td>${inv.daily}</td><td>${inv.status}</td></tr>`;
-    });
+  function showDashboard(){
+    $loadingCard.classList.add('hidden');
+    $dashboardCard.classList.remove('hidden');
+  }
 
-    // ✅ Show referred users
-    const allUsers = JSON.parse(localStorage.getItem("zenivault_referrals")) || [];
-    const referred = allUsers.filter(u => u.referrerCode === user.referralCode);
-    const refTable = document.querySelector("#referralTable tbody");
-    referred.forEach(r => {
-      refTable.innerHTML += `<tr><td>${r.name}</td><td>${r.contact}</td><td>${r.referralCode}</td></tr>`;
-    });
-
-    // ✅ Logout
-    function logout() {
-      localStorage.removeItem("isLoggedIn");
-      window.location.href = "../login.html";
+  // simple CSV parse to array of objects
+  function csvToArray(str, delimiter = ",") {
+    const lines = str.trim().split(/\r?\n/).map(l => l.trim());
+    if(lines.length === 0) return [];
+    // find header line (first non-empty)
+    const headerLine = lines.shift();
+    const headers = parseCsvRow(headerLine, delimiter);
+    return lines
+      .filter(l => l.length > 0)
+      .map(line => {
+        const values = parseCsvRow(line, delimiter);
+        const obj = {};
+        headers.forEach((h, i) => obj[h.trim()] = values[i] ? values[i].trim() : '');
+        return obj;
+      });
+  }
+  function parseCsvRow(row, delimiter){
+    // simple splitting (doesn't fully support quoted commas)
+    // for typical simple sheets this is OK. If you need robust parsing, use a CSV parser lib.
+    const out = [];
+    let cur = '', inQuotes=false;
+    for(let i=0;i<row.length;i++){
+      const ch = row[i];
+      if(ch === '"' ){ inQuotes = !inQuotes; continue; }
+      if(ch === delimiter && !inQuotes){ out.push(cur); cur=''; continue; }
+      cur += ch;
     }
-  </script>
+    out.push(cur);
+    return out;
+  }
+
+})();
+</script>
 </body>
 </html>
