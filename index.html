@@ -6,78 +6,89 @@
   <title>Zeni Vault Dashboard</title>
   <style>
     body {
-      font-family: "Poppins", sans-serif;
-      background: #f5f7fb;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
-      color: #222;
+      background-color: #f4f7fc;
+      color: #333;
     }
+
     header {
-      background: #4363f7;
+      background-color: #3b5bfd;
       color: white;
-      padding: 20px 0;
+      padding: 1rem;
       text-align: center;
-      font-size: 1.6rem;
-      font-weight: 600;
+      font-size: 1.5rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
     }
-    .container {
-      width: 90%;
-      max-width: 1000px;
-      margin: 30px auto;
+
+    .dashboard {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 2rem;
       background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
     }
+
+    h2 {
+      color: #3b5bfd;
+      margin-bottom: 1rem;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 1rem;
     }
+
     th, td {
       border: 1px solid #ddd;
-      padding: 10px;
+      padding: 0.75rem;
       text-align: center;
     }
+
     th {
-      background-color: #4363f7;
+      background-color: #3b5bfd;
       color: white;
     }
+
     tr:nth-child(even) {
-      background-color: #f9f9f9;
+      background-color: #f2f2f2;
     }
-    .footer {
-      text-align: center;
-      padding: 15px;
-      background: #4363f7;
+
+    footer {
+      background-color: #3b5bfd;
       color: white;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      font-size: 0.9rem;
-    }
-    .loading, .error {
       text-align: center;
-      margin-top: 20px;
-      color: #777;
-      font-size: 1.1rem;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+
+    .loading {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #555;
+      padding: 2rem;
     }
   </style>
 </head>
 <body>
   <header>💰 Zeni Vault Dashboard</header>
 
-  <div class="container">
-    <div id="status" class="loading">Loading your investment data...</div>
-    <table id="data-table" style="display:none;">
-      <thead id="table-head"></thead>
-      <tbody id="table-body"></tbody>
-    </table>
+  <div class="dashboard" id="dashboard">
+    <div class="loading">Loading your investment data...</div>
   </div>
 
-  <footer class="footer">© 2025 Zeni Vault</footer>
+  <footer>© 2025 Zeni Vault</footer>
 
   <script>
-    // ✅ Your published Google Sheet (CSV format)
-    const SHEET_URL =
-      https://docs.google.com/spreadsheets/d/e/2PACX-1vQZWiVZXMDk1ucOx9bjbwGS2H8rWQVEu9D93ODyHic-bIHpqXEePe0_4vvCKhlvnpH1-QXBC85fM3S0/pub?output=csv
+    // ✅ Link to your published Google Sheet (CSV format)
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZWiVZXMDk1ucOx9bjbwGS2H8rWQVEu9D93ODyHic-bIHpqXEePe0_4vvCKhlvnpH1-QXBC85fM3S0/pub?output=csv";
+
+    async function fetchData() {
+      try {
+        const response = await fetch(SHEET_URL);
+        const csvData = await respo
