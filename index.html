@@ -1,89 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Zeni Vault Dashboard</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zeni Vault Dashboard</title>
 
-    <!-- Google Font -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-    <!-- External CSS -->
-    <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5f7fa;
+      color: #222;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
 
-    <style>
-      /* Basic fallback styles (in case style.css doesn’t load) */
-      body {
-        font-family: 'Poppins', sans-serif;
-        background-color: #f5f7fa;
-        color: #222;
-        margin: 0;
-        padding: 0;
+    header {
+      background-color: #4a6ef5;
+      color: white;
+      padding: 20px;
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    footer {
+      background-color: #4a6ef5;
+      color: white;
+      padding: 10px;
+      font-size: 0.9rem;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    main {
+      padding: 30px 20px 80px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .card h3 {
+      color: #4a6ef5;
+      margin-bottom: 8px;
+    }
+
+    .loading {
+      font-size: 1.2rem;
+      color: #555;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>💰 Zeni Vault Dashboard</header>
+
+  <main>
+    <p class="loading">Loading investment data...</p>
+  </main>
+
+  <footer>© 2025 Zeni Vault</footer>
+
+  <script>
+    // 🔗 Replace the link below with your actual Google Sheets CSV export link
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/gviz/tq?tqx=out:csv";
+
+    async function loadInvestmentData() {
+      try {
+        const response = await fetch(sheetUrl);
+        const csvText = await response.text();
+
+        const rows = csvText.split("\n").map(r => r.split(","));
+        const headers = rows[0];
+        const data = rows.slice(1);
+
+        const main = document.querySelector("main");
+        main.innerHTML = "";
+
+        data.forEach(row => {
+          if (row.length >= 5) {
+            const [name, packageType, amount, dailyReturn, totalWithdrawn] = row;
+
+            const card = document.createElement("div");
+            card.classList.add("card");
+            card.innerHTML = `
+              <h3>${name}</h3>
+              <p><strong>Package:</strong> ${packageType}</p>
+              <p><strong>Amount Invested:</strong> R${amount}</p>
+              <p><strong>Daily Return:</strong> R${dailyReturn}</p>
+              <p><strong>Total Withdrawn:</strong> R${totalWithdrawn}</p>
+            `;
+            main.appendChild(card);
+          }
+        });
+
+        if (data.length === 0) {
+          main.innerHTML = "<p>No data found in your sheet.</p>";
+        }
+      } catch (error) {
+        console.error("Error loading Google Sheet data:", error);
+        document.querySelector("main").innerHTML = "<p>Failed to load data.</p>";
       }
+    }
 
-      header {
-        background-color: #4c6ef5;
-        color: white;
-        text-align: center;
-        padding: 20px;
-      }
+    loadInvestmentData();
+  </script>
 
-      header h1 {
-        margin: 0;
-        font-size: 1.8rem;
-      }
-
-      main {
-        padding: 30px 20px;
-        max-width: 900px;
-        margin: 0 auto;
-      }
-
-      .card {
-        background-color: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        padding: 25px;
-        margin-bottom: 25px;
-      }
-
-      footer {
-        background-color: #4c6ef5;
-        color: white;
-        text-align: center;
-        padding: 10px 0;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-      }
-
-      .loading {
-        text-align: center;
-        font-size: 1.2rem;
-        padding: 60px 0;
-      }
-    </style>
-  </head>
-
-  <body>
-    <header>
-      <h1>💰 Zeni Vault Dashboard</h1>
-    </header>
-
-    <main>
-      <div id="dashboard">
-        <div class="loading">Loading investment data...</div>
-      </div>
-    </main>
-
-    <footer>
-      <p>© 2025 Zeni Vault</p>
-    </footer>
-
-    <!-- Load main JS logic -->
-    <script src="pages/index.js" defer></script>
-  </body>
+</body>
 </html>
