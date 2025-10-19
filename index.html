@@ -1,94 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zeni Vault Dashboard</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f7fc;
-      color: #333;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zeni Vault Dashboard</title>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        background-color: #f5f8ff;
+        color: #333;
+      }
 
-    header {
-      background-color: #3b5bfd;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-      letter-spacing: 0.5px;
-    }
+      header {
+        background-color: #4169e1;
+        color: white;
+        text-align: center;
+        padding: 20px;
+        font-size: 1.8rem;
+        font-weight: 600;
+      }
 
-    .dashboard {
-      max-width: 900px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 80vh;
+        padding: 20px;
+      }
 
-    h2 {
-      color: #3b5bfd;
-      margin-bottom: 1rem;
-    }
+      .card {
+        background-color: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: 20px 0;
+        width: 90%;
+        max-width: 800px;
+        text-align: center;
+      }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 0.75rem;
-      text-align: center;
-    }
+      th,
+      td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+      }
 
-    th {
-      background-color: #3b5bfd;
-      color: white;
-    }
+      th {
+        background-color: #f0f4ff;
+      }
 
-    tr:nth-child(even) {
-      background-color: #f2f2f2;
-    }
+      footer {
+        background-color: #4169e1;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>💰 Zeni Vault Dashboard</header>
+    <main>
+      <div class="card" id="data-card">
+        <p>Loading your investment data...</p>
+      </div>
+    </main>
+    <footer>© 2025 Zeni Vault</footer>
 
-    footer {
-      background-color: #3b5bfd;
-      color: white;
-      text-align: center;
-      padding: 1rem;
-      margin-top: 2rem;
-    }
+    <script>
+      // ✅ Google Sheet CSV link (published version)
+      const sheetURL =
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZWiVZXMDk1ucOx9bjbwGS2H8rWQVEu9D93ODyHic-bIHpqXEePe0_4vvCKhlvnpH1-QXBC85fM3S0/pub?output=csv";
 
-    .loading {
-      text-align: center;
-      font-size: 1.2rem;
-      color: #555;
-      padding: 2rem;
-    }
-  </style>
-</head>
-<body>
-  <header>💰 Zeni Vault Dashboard</header>
+      // ✅ Use a public CORS proxy to safely access it
+      const proxyURL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(sheetURL);
 
-  <div class="dashboard" id="dashboard">
-    <div class="loading">Loading your investment data...</div>
-  </div>
+      async function loadSheetData() {
+        try {
+          const response = await fetch(proxyURL);
+          if (!response.ok) throw new Error("Failed to load data");
+          const csvText = await response.text();
 
-  <footer>© 2025 Zeni Vault</footer>
+          // Parse CSV text
+          const rows = csvText.split("\n").map((r) => r.split(","));
+          const headers = rows[0];
+          const dataRows = rows.slice(1);
 
-  <script>
-    // ✅ Link to your published Google Sheet (CSV format)
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZWiVZXMDk1ucOx9bjbwGS2H8rWQVEu9D93ODyHic-bIHpqXEePe0_4vvCKhlvnpH1-QXBC85fM3S0/pub?output=csv";
+          if (dataRows.length === 0) {
+            document.getElementById("data-card").innerHTML = "<p>No data found in your sheet.</p>";
+            return;
+          }
 
-    async function fetchData() {
-      try {
-        const response = await fetch(SHEET_URL);
-        const csvData = await respo
+          // Create HTML table
+          let html = "<table><tr>";
+          headers.forEach((h) => (html += `<th>${h}</th>`));
+          html += "</tr>";
+
+          dataRows.forEach((row) => {
+            html += "<tr>";
+            row.forEach((cell) => (html += `<td>${cell}</td>`));
+            html += "</tr>";
+          });
+          html += "</table>";
+
+          document.getElementById("data-card").innerHTML = html;
+        } catch (error) {
+          document.getElementById("data-card").innerHTML =
+            "<p style='color:red;'>⚠️ Could not load data. Check your sheet link or publish settings.</p>";
+          console.error(error);
+        }
+      }
+
+      loadSheetData();
+    </script>
+  </body>
+</html>
