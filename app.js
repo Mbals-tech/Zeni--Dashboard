@@ -1,18 +1,38 @@
-// Zeni Vault Dashboard Script
-document.addEventListener("DOMContentLoaded", () => {
-  const dashboard = document.getElementById("user-dashboard");
-  dashboard.innerHTML = "<p>Loading user data from Google Sheets...</p>";
+import { useEffect, useState } from "react";
 
-  // Example: Fetch user data (replace SHEET_URL with actual sheet API endpoint)
-  fetch("https://sheets.googleapis.com/v4/spreadsheets/YOUR_SHEET_ID/values/Users!A1:E10?key=YOUR_API_KEY")
-    .then(response => response.json())
-    .then(data => {
-      dashboard.innerHTML = "<h3>User Investments</h3>";
-      data.values.slice(1).forEach(row => {
-        dashboard.innerHTML += `<p>${row[0]} - ${row[1]} - ${row[2]}</p>`;
-      });
-    })
-    .catch(() => {
-      dashboard.innerHTML = "<p>Error loading data.</p>";
-    });
-});
+export default function Dashboard() {
+  const [data, setData] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(process.env.NEXT_PUBLIC_SHEETDB_URL);
+        const json = await res.json();
+        setData(json);
+      } catch (err) {
+        console.error(err);
+        setError("Error loading data.");
+      }
+    };
+    fetchData();
+  }, []);
+
+  return (
+    <div style={{ padding: "2rem", color: "#fff", backgroundColor: "#111", fontFamily: "Arial" }}>
+      <h1>Zeni Vault Dashboard</h1>
+
+      {error ? (
+        <p>{error}</p>
+      ) : data.length === 0 ? (
+        <p>No data yet.</p>
+      ) : (
+        data.map((item, index) => (
+          <div key={index} style={{ marginBottom: "1rem", borderBottom: "1px solid #333", paddingBottom: "0.5rem" }}>
+            <strong>{item.Name}</strong> — {item.Package} — R{item.Amount} — Daily Return: {item.DailyReturn}%
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
