@@ -3,229 +3,136 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zeni Vault Dashboard</title>
+  <title>Zeni Vault Login</title>
   <style>
     body {
       font-family: "Poppins", sans-serif;
-      background-color: #f5f7ff;
-      color: #333;
+      background: linear-gradient(145deg, #365eff, #708aff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       margin: 0;
-      padding: 0;
     }
 
-    header {
-      background-color: #365eff;
-      color: white;
-      padding: 1rem;
+    .container {
+      background-color: #fff;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 400px;
       text-align: center;
     }
 
     h1 {
-      margin: 0;
-      font-size: 1.8rem;
-    }
-
-    main {
-      max-width: 900px;
-      margin: 2rem auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-    }
-
-    th {
-      background-color: #365eff;
-      color: white;
-    }
-
-    tr:hover {
-      background-color: #f2f2f2;
-    }
-
-    .logout-btn {
-      background-color: #ff4747;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-      float: right;
-    }
-
-    .logout-btn:hover {
-      background-color: #e13a3a;
-    }
-
-    .section-title {
-      margin-top: 30px;
       color: #365eff;
+      margin-bottom: 1rem;
     }
 
-    .ref-section {
-      text-align: center;
-      margin-top: 2rem;
-      background: #f8faff;
-      padding: 1rem;
-      border-radius: 10px;
-      border: 1px solid #d5dcff;
-    }
-
-    .ref-section input {
-      width: 80%;
+    input {
+      width: 100%;
       padding: 10px;
-      border-radius: 6px;
+      margin: 8px 0;
       border: 1px solid #ccc;
-      font-size: 0.95rem;
+      border-radius: 6px;
+      font-size: 1rem;
     }
 
-    .ref-section button {
-      margin-top: 10px;
+    button {
+      width: 100%;
+      padding: 12px;
       background-color: #365eff;
       color: white;
       border: none;
-      padding: 8px 15px;
       border-radius: 6px;
+      font-size: 1rem;
+      margin-top: 1rem;
       cursor: pointer;
     }
 
-    .ref-section button:hover {
+    button:hover {
       background-color: #2b4dd4;
+    }
+
+    .switch {
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    .switch a {
+      color: #365eff;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    small {
+      display: block;
+      margin-top: 10px;
+      color: gray;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Zeni Vault Dashboard</h1>
-    <button class="logout-btn" onclick="logout()">Logout</button>
-  </header>
+  <div class="container">
+    <h1 id="formTitle">Login</h1>
 
-  <main>
-    <h2>Welcome, <span id="username"></span> 👋</h2>
+    <form id="loginForm">
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="text" id="contact" placeholder="Contact Number" required />
+      <button type="submit">Continue</button>
+    </form>
 
-    <h3 class="section-title">Your Investments</h3>
-    <table id="investmentsTable">
-      <thead>
-        <tr>
-          <th>Package</th>
-          <th>Amount</th>
-          <th>Daily Return</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <h3 class="section-title">Your Withdrawals</h3>
-    <table id="withdrawalsTable">
-      <thead>
-        <tr>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <div class="ref-section">
-      <h3>Your Referral Link</h3>
-      <input id="refLink" readonly />
-      <button onclick="copyRef()">Copy Link</button>
+    <div class="switch">
+      <span id="switchText">New user? <a id="toggleForm">Register here</a></span>
     </div>
-  </main>
+
+    <small id="refInfo"></small>
+  </div>
 
   <script>
-    // 🔐 Check login
-    const user = JSON.parse(localStorage.getItem("zeniUser"));
-    if (!user) {
-      alert("Please login first.");
-      window.location.href = "login.html";
+    const form = document.getElementById("loginForm");
+    const formTitle = document.getElementById("formTitle");
+    const toggleForm = document.getElementById("toggleForm");
+    const switchText = document.getElementById("switchText");
+    const refInfo = document.getElementById("refInfo");
+
+    let isRegistering = false;
+
+    // 🧭 Detect referral link (?ref=number)
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get("ref");
+    if (ref) {
+      refInfo.innerText = `You were referred by: ${ref}`;
     }
 
-    document.getElementById("username").textContent = user.name;
+    // 🔄 Toggle login/register
+    toggleForm.addEventListener("click", () => {
+      isRegistering = !isRegistering;
+      formTitle.textContent = isRegistering ? "Register" : "Login";
+      switchText.innerHTML = isRegistering
+        ? `Already have an account? <a id="toggleForm">Login here</a>`
+        : `New user? <a id="toggleForm">Register here</a>`;
+    });
 
-    // 🧭 Referral link
-    const refUrl = `${window.location.origin}/login.html?ref=${user.contact}`;
-    document.getElementById("refLink").value = refUrl;
+    // 🧩 Handle submit
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const contact = document.getElementById("contact").value.trim();
 
-    function copyRef() {
-      const input = document.getElementById("refLink");
-      input.select();
-      document.execCommand("copy");
-      alert("Referral link copied!");
-    }
+      if (!name || !contact) {
+        alert("Please fill in all fields.");
+        return;
+      }
 
-    function logout() {
-      localStorage.removeItem("zeniUser");
-      window.location.href = "login.html";
-    }
+      // 🗂️ Save user locally
+      const user = { name, contact, referrer: ref || null };
+      localStorage.setItem("zeniUser", JSON.stringify(user));
 
-    // 📊 Load data from your Google Sheets CSV link
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZWiVZXMDk1ucOx9bjbwGS2H8rWQVEu9D93ODyHic-bIHpqXEePe0_4vvCKhlvnpH1-QXBC85fM3S0/pub?output=csv";
-
-    fetch(sheetUrl)
-      .then(res => res.text())
-      .then(csv => {
-        const rows = csv.split("\n").map(r => r.split(","));
-        const headers = rows[0].map(h => h.trim().toLowerCase());
-        const data = rows.slice(1).map(r => {
-          const obj = {};
-          headers.forEach((h, i) => (obj[h] = r[i]?.trim()));
-          return obj;
-        });
-
-        // 🧮 Filter by user's contact
-        const userData = data.filter(
-          item =>
-            item.contact === user.contact ||
-            item["contact number"] === user.contact
-        );
-
-        // 🏦 Populate investments
-        const investmentsTable = document.querySelector("#investmentsTable tbody");
-        const withdrawalsTable = document.querySelector("#withdrawalsTable tbody");
-
-        investmentsTable.innerHTML = "";
-        withdrawalsTable.innerHTML = "";
-
-        userData.forEach(item => {
-          if (item.type?.toLowerCase() === "investment") {
-            investmentsTable.innerHTML += `
-              <tr>
-                <td>${item.package || "-"}</td>
-                <td>${item.amount || "-"}</td>
-                <td>${item.dailyreturn || item["daily return"] || "-"}</td>
-                <td>${item.date || "-"}</td>
-              </tr>
-            `;
-          } else if (item.type?.toLowerCase() === "withdrawal") {
-            withdrawalsTable.innerHTML += `
-              <tr>
-                <td>${item.amount || "-"}</td>
-                <td>${item.status || "-"}</td>
-                <td>${item.date || "-"}</td>
-              </tr>
-            `;
-          }
-        });
-      })
-      .catch(err => {
-        console.error("Error loading sheet:", err);
-        alert("Could not load your data. Please try again later.");
-      });
+      // ✅ Redirect to dashboard
+      window.location.href = "index.html";
+    });
   </script>
 </body>
 </html>
