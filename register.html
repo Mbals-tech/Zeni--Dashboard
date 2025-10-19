@@ -1,91 +1,30 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Zeni Vault — Register</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zeni Vault – Register</title>
   <style>
-    /* Minimal styling */
-    body { font-family: 'Poppins', sans-serif; background:#f5f7fa; color:#222; margin:0; padding:0; }
-    .wrap{max-width:720px;margin:40px auto;padding:24px;background:#fff;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.08);}
-    h1{margin:0 0 16px;font-size:24px;}
-    label{display:block;margin:12px 0 6px;font-weight:600;}
-    input{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;}
-    .row{display:flex;gap:12px}
-    .btn{display:inline-block;padding:10px 16px;background:#3f6df0;color:white;border-radius:8px;border:0;cursor:pointer;margin-top:12px;}
-    .muted{color:#666;font-size:13px}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <h1>Create an account</h1>
-
-    <p class="muted">Use Full name & Contact number (contact used as unique login + referral id).</p>
-
-    <label>Full name</label>
-    <input id="name" placeholder="E.g. Eunice Mbali" />
-
-    <label>Contact number (used as login & referral)</label>
-    <input id="contact" placeholder="E.g. 0821234567" />
-
-    <label>Optional password (you can leave blank)</label>
-    <input id="password" placeholder="Optional password" type="password" />
-
-    <div style="margin-top:8px;">
-      <button class="btn" id="registerBtn">Create account</button>
-      <a href="login.html" style="margin-left:12px;color:#3f6df0">Already have an account? Login</a>
-    </div>
-
-    <p id="message" class="muted"></p>
-  </div>
-
-<script>
-/*
-  Registration flow:
-  - Accept ?ref=ZV-xxxx (optional)
-  - Save user to localStorage under 'zeni_users' as array of {name,contact,password,referrer,referralCode}
-  - Auto-generate referralCode = 'ZV-' + contact
-  - Redirect to login or dashboard (we'll send to login.html)
-*/
-(function(){
-  const getQuery = (k)=> new URLSearchParams(location.search).get(k);
-  const refQuery = getQuery('ref'); // e.g. ZV-123
-
-  const $name = document.getElementById('name');
-  const $contact = document.getElementById('contact');
-  const $password = document.getElementById('password');
-  const $msg = document.getElementById('message');
-  const $btn = document.getElementById('registerBtn');
-
-  function readUsers(){ return JSON.parse(localStorage.getItem('zeni_users') || '[]');}
-  function writeUsers(u){ localStorage.setItem('zeni_users', JSON.stringify(u)); }
-
-  $btn.addEventListener('click', ()=>{
-    const name = $name.value.trim();
-    const contact = $contact.value.trim();
-    const password = $password.value || "";
-    if(!name || !contact){ $msg.textContent = "Please enter name and contact number."; return; }
-
-    // simple uniqueness check by contact
-    const users = readUsers();
-    if(users.some(u=>u.contact === contact)){ $msg.textContent = "An account with that contact already exists. Please login."; return; }
-
-    const referralCode = "ZV-" + contact;
-    const user = { name, contact, password, referralCode, referrer: refQuery || null, createdAt: Date.now() };
-    users.push(user);
-    writeUsers(users);
-
-    // set current session
-    localStorage.setItem('zeni_current', JSON.stringify({ contact, name }));
-
-    // Redirect to dashboard (index.html)
-    $msg.textContent = "Account created. Redirecting to your dashboard...";
-    setTimeout(()=> location.href = 'index.html', 900);
-  });
-
-  // auto-populate contact if in query ?contact=...
-  const preContact = getQuery('contact'); if(preContact) $contact.value = preContact;
-})();
-</script>
-</body>
-</html>
+    body {
+      font-family: "Poppins", sans-serif;
+      background-color: #f3f6fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 350px;
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+     
