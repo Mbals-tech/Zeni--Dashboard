@@ -1,22 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zeni Vault – Register</title>
-  <style>
-    body {
-      font-family: "Poppins", sans-serif;
-      background-color: #f3f6fc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 350px;
-      text-align: center
+function registerUser() {
+  const name = document.getElementById("name").value.trim();
+  const contact = document.getElementById("contact").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!name || !contact) {
+    alert("Please fill in your name and contact number");
+    return;
+  }
+
+  const users = JSON.parse(localStorage.getItem("zeniUsers")) || [];
+
+  if (users.some(u => u.contact === contact)) {
+    alert("This contact number is already registered!");
+    return;
+  }
+
+  // Generate referral code
+  const referralCode = "ZV-" + contact;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const referredBy = urlParams.get("ref") || null;
+
+  const newUser = { name, contact, password, referralCode, referredBy };
+  users.push(newUser);
+
+  localStorage.setItem("zeniUsers", JSON.stringify(users));
+  localStorage.setItem("loggedInUser", JSON.stringify(newUser));
+
+  alert(`Registration successful! Your referral link is: ${window.location.origin}/register.html?ref=${referralCode}`);
+
+  window.location.href = "index.html";
+}
